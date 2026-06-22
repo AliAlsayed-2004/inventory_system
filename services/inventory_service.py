@@ -9,7 +9,6 @@ def add_item(name, category, quantity):
     db.add(item)
     db.commit()
 
-    # تسجيل الحركة
     transaction = Transaction(
         item_id=item.id,
         action_type="add",
