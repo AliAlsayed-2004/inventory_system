@@ -2,6 +2,10 @@ from database.db import SessionLocal
 from models.item import Item
 from models.transaction import Transaction
 
+
+
+# --------------------- Item Functions ---------------------
+
 def add_item(name, category, quantity):
     db = SessionLocal()
 
@@ -22,6 +26,16 @@ def add_item(name, category, quantity):
     db.close()
     return item
 
+def get_item_by_id(item_id):
+    db = SessionLocal()
+    item = db.query(Item).get(item_id)
+
+    if not item:
+        return f"Item {item_id} Not Found"
+    
+    db.close()
+    
+    return item
 
 
 def get_all_items():
@@ -38,6 +52,51 @@ def search_item(name):
     return items
 
 
+def update_item(item_id, new_name=None, new_category=None):
+    db = SessionLocal()
+
+    item = db.query(Item).get(item_id)
+
+    if not item:
+        return "Item not found"
+
+    if new_name:
+        item.name = new_name
+
+    if new_category:
+        item.category = new_category
+
+    transaction = Transaction(
+        item_id=item.id,
+        action_type="update",
+        quantity=0,
+        note="تم تعديل البيانات"
+    )
+
+    db.add(transaction)
+    db.commit()
+    db.close()
+
+    return item
+
+
+
+def delete_item(item_id):
+    db = SessionLocal()
+
+    item = db.query(Item).get(item_id)
+
+    if not item:
+        return "Item not found"
+
+    db.delete(item)
+    db.commit()
+    db.close()
+
+    return "Deleted"
+
+
+# --------------------- Quantity Functions ---------------------
 
 def increase_quantity(item_id, amount):
     db = SessionLocal()
@@ -92,57 +151,26 @@ def decrease_quantity(item_id, amount):
     return item
 
 
-def update_item(item_id, new_name=None, new_category=None):
-    db = SessionLocal()
-
-    item = db.query(Item).get(item_id)
-
-    if not item:
-        return "Item not found"
-
-    if new_name:
-        item.name = new_name
-
-    if new_category:
-        item.category = new_category
-
-    transaction = Transaction(
-        item_id=item.id,
-        action_type="update",
-        quantity=0,
-        note="تم تعديل البيانات"
-    )
-
-    db.add(transaction)
-    db.commit()
-    db.close()
-
-    return item
 
 
+# --------------------- Transaction Functions ---------------------
 
-def delete_item(item_id):
-    db = SessionLocal()
-
-    item = db.query(Item).get(item_id)
-
-    if not item:
-        return "Item not found"
-
-    db.delete(item)
-    db.commit()
-    db.close()
-
-    return "Deleted"
-
-
-def get_transactions(item_id=None):
+def get_transactions(item_id):
     db = SessionLocal()
 
     if item_id:
         transactions = db.query(Transaction).filter_by(item_id=item_id).all()
     else:
-        transactions = db.query(Transaction).all()
+        return f"Item {item_id} Not Found"
 
     db.close()
     return transactions
+
+
+def get_all_transactions():
+    db = SessionLocal()
+    transactions = db.query(Transaction).all()
+    db.close()
+    return transactions
+
+

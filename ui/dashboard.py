@@ -3,7 +3,7 @@ from PySide6.QtWidgets import (
     QWidget, QLabel, QVBoxLayout, QHBoxLayout,
     QPushButton, QTableWidget, QTableWidgetItem
 )
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt,  QPropertyAnimation, QEasingCurve
 
 from services.inventory_service import get_all_items
 
@@ -17,6 +17,14 @@ class DashboardWindow(QWidget):
         self.setStyleSheet(self.styles())
 
         self.init_ui()
+        self.setWindowOpacity(0)
+        self.anim = QPropertyAnimation(self, b"windowOpacity")
+        self.anim.setDuration(800)
+        self.anim.setStartValue(0)
+        self.anim.setEndValue(1)
+        self.anim.setEasingCurve(QEasingCurve.InOutQuad)
+
+        self.anim.start()
         self.load_data()
 
     def init_ui(self):
