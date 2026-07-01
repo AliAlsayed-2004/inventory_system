@@ -1,0 +1,20 @@
+QWidget {
+    background-color: #111827;
+}
+
+#LoginCard QLabel {
+    color: #F9FAFB;
+}
+
+LineEdit, PasswordLineEdit {
+    color: #F9FAFB;
+    background-color: #1F2937;
+    border: 1px solid #374151;
+    border-radius: 10px;
+    padding: 8px;
+}
+
+/* Placeholder */
+LineEdit, PasswordLineEdit {
+    qproperty-placeholderTextColor: #9CA3AF;
+}

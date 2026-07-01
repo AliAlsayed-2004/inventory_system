@@ -7,7 +7,14 @@ def hash_password(password: str):
 
 
 def check_password(password: str, hashed: str):
-    return bcrypt.checkpw(password.encode('utf-8'), hashed)
+    """Check password against hashed password"""
+    try:
+        # تأكد أن hashed هو bytes
+        if isinstance(hashed, str):
+            hashed = hashed.encode('utf-8')
+        return bcrypt.checkpw(password.encode('utf-8'), hashed)
+    except Exception:
+        return False
 
 
 def register_user(username, password, full_name):

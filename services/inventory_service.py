@@ -1,7 +1,7 @@
 from database.db import SessionLocal
 from models.item import Item
 from models.transaction import Transaction
-
+from datetime import datetime
 
 
 # --------------------- Item Functions ---------------------
@@ -17,12 +17,12 @@ def add_item(name, category, quantity):
         item_id=item.id,
         action_type="add",
         quantity=quantity,
-        note="New item created"
+        note="New item created",
+        created_at=datetime.now()       # ← مهم
     )
 
     db.add(transaction)
     db.commit()
-
     db.close()
     return item
 
@@ -68,9 +68,11 @@ def update_item(item_id, new_name=None, new_category=None):
 
     transaction = Transaction(
         item_id=item.id,
+        item_name=item.name,
         action_type="update",
         quantity=0,
-        note="تم تعديل البيانات"
+        note="تم تعديل البيانات",
+        created_at=datetime.now()
     )
 
     db.add(transaction)
@@ -84,12 +86,13 @@ def update_item(item_id, new_name=None, new_category=None):
 def delete_item(item_id):
     db = SessionLocal()
 
+    # حذف الحركات يدوياً (احتياطي)
+    db.query(Transaction).filter_by(item_id=item_id).delete()
+
     item = db.query(Item).get(item_id)
+    if item:
+        db.delete(item)
 
-    if not item:
-        return "Item not found"
-
-    db.delete(item)
     db.commit()
     db.close()
 
@@ -112,7 +115,8 @@ def increase_quantity(item_id, amount):
         item_id=item.id,
         action_type="add",
         quantity=amount,
-        note="زيادة كمية"
+        note="زيادة كمية",
+        created_at=datetime.now()
     )
 
     db.add(transaction)
@@ -123,16 +127,16 @@ def increase_quantity(item_id, amount):
 
 
 
-
-def decrease_quantity(item_id, amount):
+def decrease_quantity(item_id, amount, note=None):
     db = SessionLocal()
 
     item = db.query(Item).get(item_id)
-
     if not item:
+        db.close()
         return "Item not found"
 
     if item.quantity < amount:
+        db.close()
         return "Not enough quantity"
 
     item.quantity -= amount
@@ -141,7 +145,8 @@ def decrease_quantity(item_id, amount):
         item_id=item.id,
         action_type="remove",
         quantity=amount,
-        note="خصم كمية"
+        note=note or f"خصم كمية {amount} وحدة",
+        created_at=datetime.now()
     )
 
     db.add(transaction)
